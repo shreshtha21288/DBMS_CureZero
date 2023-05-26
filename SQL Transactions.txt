@@ -1,0 +1,91 @@
+
+
+transaction 1(T1): 
+select med_id, med_name, med_price from medicine where company="PharmaCo"; (Read on table medicine)
+update stock set quantity=quantity+100 where med_id=1; (Write on table stock)
+
+transaction 2(T2): 
+update medicine set med_price=med_price*1.05 where company="PharmaCo"; (Write on table medicide)
+select quantity from stock where med_id=1; (Read on table stock)
+
+
+Conflict Serializable Schedule:
+
+Begin Transaction;
+select med_id, med_name, med_price from medicine where company="PharmaCo";(T1: Lock S)
+update stock set quantity=quantity+100 where med_id=1; (T1: Lock X)
+Commit;( Unlock X, Unlock S)
+Begin Transaction;
+update medicine set med_price=med_price*1.05 where company="PharmaCo"; (T2: Lock X)
+select quantity from stock where med_id=1; (T2: Lock S)
+Commit;( Unlock X, Unlock S)
+
+Explanation: T1 acquires shared lock on medicide table to read from it and stock table acquires exclusive lock to write on it. T2 acquires exclusive lock on medicine and shared lock for stock table. This way there are no conflicting operations and it will not lead to deadlock as there are no circular waits.
+
+Non-Conflict Serializable Schedule:
+
+Begin Transaction;
+select med_id, med_name, med_price from medicine where company="PharmaCo";(T	1)
+Begin Transaction;
+update medicine set med_price=med_price*1.05 where company="PharmaCo";(T2)
+update stock set quantity=quantity+100 where med_id=1;(T1)
+select quantity from stock where med_id=1;(T2)
+Commit;
+Commit;
+
+Explanation: 
+
+This contains a pair of conflicting operations; thus, the schedule is not conflict serializable. The medicine table is read by T1 in this schedule, and then T2 writes to the same medicine table. T2 then reads from the stock table once T1 has finished writing to it. Without proper synchronization, it will remain conflicting. 
+
+Non-conflicting transactions
+
+1. Begin transaction;
+   update medicine set med_price=med_price+200 where category="tablet";
+   commit;
+
+   Begin transaction;
+   update stock set quantity=quantity+100 where med_id=9;
+   commit;
+
+2. Begin transaction;
+   update customer set cust_pswd="ghi" where cust_id=24;
+   commit;
+
+   Begin transaction;
+   insert into customer(cust_id, cust_name, cust_contact, cust_address, cust_pres, cust_pswd) values(39, "Goerge Peter", "8946574893", "Hampshire", "Coldrex", "xyz");
+   commit;
+
+3. Begin transaction;
+   update supplier set sup_address="New York" where sup_id=16;
+   commit;
+
+   Begin transaction;
+   insert into supplier(transc_id, cust_name, total_amount, quantity, transc_date, payment_type, med_id) values(11, "Ravi Gupta", 0, 7, 2021-07-13, "online", 1)
+   commit;
+
+
+4. Begin transaction;
+   select company from medicine where med_name="Arcoxia";
+   commit;
+
+   Begin transaction;
+   select company from medicine where med_name="Arcoxia";
+   commit;
+
+Conflicting transactions
+
+1. Begin transaction;
+   update medicine set med_price=med_price*1.05 where company="PharmaCo";
+   commit;
+
+   Begin Transaction;
+   select med_id, med_name, med_price from medicine where company="PharmaCo";
+   commit;
+
+2. Begin transaction;
+   update stock set quantity=quantity-20 where med_id=4;
+   commit;
+
+   Begin transaction;
+   insert into transaction(transc_id, cust_name, total_amount, quantity, transc_date, payment_type, med_id) values(58, "Sonia Agarwal", 4460, 5, "2021-01-29", "online", "1");
+   commit;

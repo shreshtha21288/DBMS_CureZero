@@ -1,0 +1,207 @@
+EMPLOYEE TABLE:
+
+1. select ep_id, ep_name from employee where ep_address="Louisville";
++-------+----------------+
+| ep_id | ep_name        |
++-------+----------------+
+|    17 | Nicholas Boyle |
+|    26 | Denny Watson   |
++-------+----------------+
+
+2. select ep_id, ep_name from employee where ep_salary>=50000;
++-------+-------------------+
+| ep_id | ep_name           |
++-------+-------------------+
+|     4 | Daron Jenkins     |
+|     5 | Hanna Torres      |
+|     8 | Jacob Cunningham  |
+|    10 | Jolene Stevens    |
+|    11 | Miriam Walsh      |
+|    12 | Tess Jefferson    |
+|    13 | Ally Wallace      |
+|    14 | Percy Morgan      |
+|    18 | Jayden Richardson |
+|    20 | Anais Phillips    |
+|    30 | Marla Spencer     |
++-------+-------------------+
+
+3. update employee set ep_salary=10000 where ep_id=15; 
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+4. select * from employee where ep_name like "J%";
++-------+-------------------+------------+-------------+-----------+
+| ep_id | ep_name           | ep_contact | ep_address  | ep_salary |
++-------+-------------------+------------+-------------+-----------+
+|     2 | Johnny Ashley     | 1184429848 | Tallahassee |      5387 |
+|     8 | Jacob Cunningham  | 1477455167 | Quebec      |     85674 |
+|    10 | Jolene Stevens    | 1755981180 | Otawa       |     73836 |
+|    18 | Jayden Richardson | 1671744893 | Rochester   |     58356 |
++-------+-------------------+------------+-------------+-----------+
+
+5. select ep_name as admin_name from employee where ep_id in (select admin_id from curezero);
++------------------+
+| admin_name       |
++------------------+
+| Puneet Singh     |
+| Johnny Ashley    |
+| Hanna Torres     |
+| Bart Keys        |
+| Sloane Rogers    |
+| Jacob Cunningham |
+| Daphne Tennant   |
++------------------+
+
+6. select * from employee where ep_salary>(select avg(ep_salary) from employee);
++-------+-------------------+------------+--------------+-----------+
+| ep_id | ep_name           | ep_contact | ep_address   | ep_salary |
++-------+-------------------+------------+--------------+-----------+
+|     3 | Owen Mason        | 975712035  | Saint Paul   |     46742 |
+|     4 | Daron Jenkins     | 685531599  | Wien         |     69293 |
+|     5 | Hanna Torres      | 923126244  | Jacksonville |     77174 |
+|     8 | Jacob Cunningham  | 1477455167 | Quebec       |     85674 |
+|    10 | Jolene Stevens    | 1755981180 | Otawa        |     73836 |
+|    11 | Miriam Walsh      | 59799613   | Venice       |     67791 |
+|    12 | Tess Jefferson    | 738154571  | Berna        |     89399 |
+|    13 | Ally Wallace      | 1643082517 | Berlin       |     55036 |
+|    14 | Percy Morgan      | 1207074263 | Tokyo        |     94343 |
+|    17 | Nicholas Boyle    | 1961049047 | Louisville   |     47692 |
+|    18 | Jayden Richardson | 1671744893 | Rochester    |     58356 |
+|    20 | Anais Phillips    | 1993877668 | El Paso      |     54964 |
+|    30 | Marla Spencer     | 1169694212 | Lincoln      |     52011 |
++-------+-------------------+------------+--------------+-----------+
+
+MEDICINE TABLE:
+
+7. select med_name, category from medicine where presc="Yes";
++-----------+----------+
+| med_name  | category |
++-----------+----------+
+| Arcoxia   | Pepcid   |
+| Makena    | Prozac   |
+| Risperdal | Advil    |
+| Gravol    | Zoloft   |
+| Metformin | tablet   |
++-----------+----------+
+
+8. select med_id, med_name from medicine where expiry_date between "2021-01-01" and "2025-01-01";
++--------+-----------+
+| med_id | med_name  |
++--------+-----------+
+|      8 | Risperdal |
+|      9 | Gravol    |
++--------+-----------+
+
+9. select count(med_id) from medicine where presc="No";
++---------------+
+| count(med_id) |
++---------------+
+|             5 |
++---------------+
+
+10. select * from medicine natural join stock;
++--------+-----------+----------+-----------+----------+-------+-------------+----------+
+| med_id | med_name  | company  | med_price | category | presc | expiry_date | quantity |
++--------+-----------+----------+-----------+----------+-------+-------------+----------+
+|      1 | Arcoxia   | PharmaCo |       704 | Pepcid   | Yes   | 2013-04-26  |       34 |
+|      4 | Novolin   | Torrent  |      3170 | Ibalgin  | No    | 2014-09-28  |       87 |
+|      7 | Aspirin   | Cipla    |      3878 | Emend    | No    | 2018-12-26  |       67 |
+|      9 | Gravol    | Lupin    |      1550 | Zoloft   | Yes   | 2022-04-23  |       54 |
+|    100 | Metformin | PharmaCo |       500 | tablet   | yes   | 2025-06-23  |      100 |
++--------+-----------+----------+-----------+----------+-------+-------------+----------+ 
+
+11. select medicine.med_id, medicine.med_name, medicine.category, stock.quantity from medicine right outer join stock on medicine.med_id=stock.med_id;
++--------+-----------+----------+----------+
+| med_id | med_name  | category | quantity |
++--------+-----------+----------+----------+
+|      1 | Arcoxia   | Pepcid   |       34 |
+|      4 | Novolin   | Ibalgin  |       87 |
+|      7 | Aspirin   | Emend    |       67 |
+|      9 | Gravol    | Zoloft   |       54 |
+|    100 | Metformin | tablet   |      100 |
++--------+-----------+----------+----------+
+
+TRANSACTION TABLE:
+
+12. select sum(total_amount) from transaction where transc_date="2020-03-03";
++-------------------+
+| sum(total_amount) |
++-------------------+
+|              7500 |
++-------------------+
+
+13. select constraint_name, table_schema, table_name, constraint_type from information_schema.table_constraints where table_name="transaction";
++--------------------+--------------+-------------+-----------------+
+| CONSTRAINT_NAME    | TABLE_SCHEMA | TABLE_NAME  | CONSTRAINT_TYPE |
++--------------------+--------------+-------------+-----------------+
+| PRIMARY            | pharmacy     | transaction | PRIMARY KEY     |
+| transaction_ibfk_1 | pharmacy     | transaction | FOREIGN KEY     |
++--------------------+--------------+-------------+-----------------+
+
+14. select sum(total_amount), transc_date from transaction group by transc_date order by transc_date;
++-------------------+-------------+
+| sum(total_amount) | transc_date |
++-------------------+-------------+
+|              1722 | 2015-10-13  |
+|              1423 | 2016-11-03  |
+|               530 | 2019-08-24  |
+|              7500 | 2020-03-03  |
+|              1050 | 2020-07-06  |
+|               673 | 2021-02-10  |
+|              1405 | 2021-12-09  |
++-------------------+-------------+
+
+15. select transaction.transc_id, customer.cust_name, transaction.transc_date from transaction inner join customer on transaction.cust_name=customer.cust_name;
++-----------+--------------------+-------------+
+| transc_id | cust_name          | transc_date |
++-----------+--------------------+-------------+
+|        12 | Raman Singh        | 2019-08-24  |
+|        13 | Abhinav Gupta      | 2020-07-06  |
+|        35 | Zoya Singhania     | 2020-03-03  |
+|        43 | Daron Jenkins      | 2021-02-10  |
+|        56 | Naina Verma        | 2020-03-03  |
+|        72 | Shivangi Mukherjee | 2015-10-13  |
+|        82 | Shriya Agarwal     | 2016-11-03  |
+|        83 | Jolene Stevens     | 2021-12-09  |
++-----------+--------------------+-------------+
+
+SUPPLIER TABLE:
+
+16. select count(sup_id), sup_quantity from supplier group by sup_quantity order by count(sup_id) desc;
++---------------+--------------+
+| count(sup_id) | sup_quantity |
++---------------+--------------+
+|             3 |           30 |
+|             1 |           83 |
+|             1 |           87 |
+|             1 |           10 |
+|             1 |           45 |
+|             1 |           74 |
+|             1 |           52 |
+|             1 |           20 |
+|             1 |           81 |
+|             1 |           63 |
+|             1 |           43 |
+|             1 |            9 |
+|             1 |           96 |
+|             1 |           59 |
+|             1 |           70 |
+|             1 |           89 |
+|             1 |           49 |
+|             1 |           35 |
+|             1 |           67 |
+|             1 |           69 |
+|             1 |           90 |
+|             1 |           25 |
+|             1 |           48 |
+|             1 |           77 |
+|             1 |           55 |
+|             1 |           11 |
+|             1 |           32 |
+|             1 |           50 |
++---------------+--------------+
+
+ 
+
+
+

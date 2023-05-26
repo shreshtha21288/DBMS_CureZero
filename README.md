@@ -1,1 +1,1 @@
-# DBMS_CureZero
+The main aim of this project is managing the records of the pharmaceutical store CureZero. It is a database application that provides the admin with storing, managing, and retrieving data such as the stock of medicines, the number of medicines sold, supplier details, staffs at medical store, customer details, etc. The customers have the option to purchase the required medicines, upload prescriptions, place an order, etc.

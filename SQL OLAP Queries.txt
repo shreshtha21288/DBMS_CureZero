@@ -1,0 +1,226 @@
+Embedded queries:
+
+1.
+import mysql.connector
+conn=mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="dugdug2334",
+  database="pharmacy")
+crsr=conn.cursor()
+crsr.execute("select medicine.med_id, medicine.med_name, medicine.category, stock.quantity from medicine right outer join stock on medicine.med_id=stock.med_id")
+res=crsr.fetchall()
+for i in res:
+  print(i)
+
+2.
+import mysql.connector
+conn=mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="dugdug2334",
+  database="pharmacy")
+crsr=conn.cursor()
+crsr.execute("select ep_name as admin_name from employee where ep_id in (select admin_id from curezero)")
+res=crsr.fetchall()
+for i in res:
+  print(i)
+
+Triggers:
+
+1. 
+delimiter #
+create trigger stock_qty1 after insert on transaction for each row begin update stock set quantity=quantity-new.quantity where med_id=new.med_id;end#
+delimiter;
+
+select * from stock;
++--------+-----------+----------+
+| med_id | med_name  | quantity |
++--------+-----------+----------+
+|      1 | Arcoxia   |       34 |
+|      4 | Novolin   |       87 |
+|      7 | Aspirin   |       67 |
+|      9 | Gravol    |       54 |
+|    100 | Metformin |      100 |
++--------+-----------+----------+
+
+insert into transaction (transc_id, cust_name, total_amount, quantity, transc_date, payment_type, med_id) values(68, "Harjeet Singh", 7349, 3, "2021-11-10", "online", 7);
+
+select * from stock;
++--------+-----------+----------+
+| med_id | med_name  | quantity |
++--------+-----------+----------+
+|      1 | Arcoxia   |       34 |
+|      4 | Novolin   |       87 |
+|      7 | Aspirin   |       64 |
+|      9 | Gravol    |       54 |
+|    100 | Metformin |      100 |
++--------+-----------+----------+
+
+2. 
+delimiter #
+mysql> create trigger amt before insert on transaction for each row begin if new.total_amount=0 then set new.total_amount=new.quantity*(select med_price from medicine where medicine.med_id=new.med_id);end if;end#
+
+delimiter ;
+insert into transaction(transc_id, cust_name, total_amount, quantity, transc_date, payment_type, med_id) values(73, "Riya Singh", 0, 6, "2020-11-10", "online", 9);
+
+select * from transaction;
++-----------+--------------------+--------------+----------+-------------+--------------+--------+
+| transc_id | cust_name          | total_amount | quantity | transc_date | payment_type | med_id |
++-----------+--------------------+--------------+----------+-------------+--------------+--------+
+|        12 | Raman Singh        |          530 |        1 | 2019-08-24  | Cash         |    100 |
+|        13 | Abhinav Gupta      |         1050 |        3 | 2020-07-06  | cash         |      4 |
+|        35 | Zoya Singhania     |         7000 |        5 | 2020-03-03  | card         |      6 |
+|        43 | Daron Jenkins      |          673 |        2 | 2021-02-10  | online       |      3 |
+|        56 | Naina Verma        |          500 |        2 | 2020-03-03  | online       |      5 |
+|        68 | Harjeet Singh      |         7349 |        3 | 2021-11-10  | online       |      7 |
+|        72 | Shivangi Mukherjee |         1722 |        3 | 2015-10-13  | cash         |      2 |
+|        73 | Riya Singh         |         9300 |        6 | 2020-11-10  | online       |      9 |
+|        82 | Shriya Agarwal     |         1423 |        4 | 2016-11-03  | cash         |      2 |
+|        83 | Jolene Stevens     |         1405 |        1 | 2021-12-09  | online       |      5 |
++-----------+--------------------+--------------+----------+-------------+--------------+--------+
+
++--------+------------+----------+-----------+----------+-------+-------------+
+| med_id | med_name   | company  | med_price | category | presc | expiry_date |
++--------+------------+----------+-----------+----------+-------+-------------+
+|      9 | Gravol     | Lupin    |      1550 | Zoloft   | Yes   | 2022-04-23  |
++--------+------------+----------+-----------+----------+-------+-------------+
+
+OLAP queries:
+
+1.
+select transc_date, quantity, cust_name, sum(total_amount) from transaction group by transc_date, quantity, cust_name with rollup;
++-------------+----------+--------------------+-------------------+
+| transc_date | quantity | cust_name          | sum(total_amount) |
++-------------+----------+--------------------+-------------------+
+| 2015-10-13  |        3 | Shivangi Mukherjee |              1722 |
+| 2015-10-13  |        3 | NULL               |              1722 |
+| 2015-10-13  |     NULL | NULL               |              1722 |
+| 2016-11-03  |        4 | Shriya Agarwal     |              1423 |
+| 2016-11-03  |        4 | NULL               |              1423 |
+| 2016-11-03  |     NULL | NULL               |              1423 |
+| 2019-08-24  |        1 | Raman Singh        |               530 |
+| 2019-08-24  |        1 | NULL               |               530 |
+| 2019-08-24  |     NULL | NULL               |               530 |
+| 2020-03-03  |        2 | Naina Verma        |               500 |
+| 2020-03-03  |        2 | NULL               |               500 |
+| 2020-03-03  |        5 | Zoya Singhania     |              7000 |
+| 2020-03-03  |        5 | NULL               |              7000 |
+| 2020-03-03  |     NULL | NULL               |              7500 |
+| 2020-07-06  |        3 | Abhinav Gupta      |              1050 |
+| 2020-07-06  |        3 | NULL               |              1050 |
+| 2020-07-06  |     NULL | NULL               |              1050 |
+| 2020-11-10  |        6 | Riya Singh         |              9300 |
+| 2020-11-10  |        6 | NULL               |              9300 |
+| 2020-11-10  |     NULL | NULL               |              9300 |
+| 2021-02-10  |        2 | Daron Jenkins      |               673 |
+| 2021-02-10  |        2 | NULL               |               673 |
+| 2021-02-10  |     NULL | NULL               |               673 |
+| 2021-11-10  |        3 | Harjeet Singh      |              7349 |
+| 2021-11-10  |        3 | NULL               |              7349 |
+| 2021-11-10  |     NULL | NULL               |              7349 |
+| 2021-12-09  |        1 | Jolene Stevens     |              1405 |
+| 2021-12-09  |        1 | NULL               |              1405 |
+| 2021-12-09  |     NULL | NULL               |              1405 |
+| NULL        |     NULL | NULL               |             30952 |
++-------------+----------+--------------------+-------------------+
+
+2. 
+select sup_name, sup_address, sum(sup_quantity) from supplier group by sup_name, sup_address with rollup;
++-------------------+---------------+-------------------+
+| sup_name          | sup_address   | sum(sup_quantity) |
++-------------------+---------------+-------------------+
+| Alexander Hall    | Lakewood      |                25 |
+| Alexander Hall    | NULL          |                25 |
+| Anthony Riley     | Columbus      |                30 |
+| Anthony Riley     | NULL          |                30 |
+| Benny Patel       | Indianapolis  |                11 |
+| Benny Patel       | NULL          |                11 |
+| Brad Murray       | Bucharest     |                 9 |
+| Brad Murray       | NULL          |                 9 |
+| Bryon Windsor     | Honolulu      |                96 |
+| Bryon Windsor     | NULL          |                96 |
+| Carl Roberts      | Paris         |                30 |
+| Carl Roberts      | NULL          |                30 |
+| Caroline Pierre   | Hollywood     |                 5 |
+| Caroline Pierre   | NULL          |                 5 |
+| Carter Addley     | Atlanta       |                74 |
+| Carter Addley     | NULL          |                74 |
+| Cedrick Casey     | Anaheim       |                77 |
+| Cedrick Casey     | NULL          |                77 |
+| Chester Hastings  | Albuquerque   |                52 |
+| Chester Hastings  | NULL          |                52 |
+| Eduardo Carson    | Dallas        |                87 |
+| Eduardo Carson    | NULL          |                87 |
+| Eduardo Fleming   | Boston        |                59 |
+| Eduardo Fleming   | NULL          |                59 |
+| Elijah Taylor     | Rochester     |                89 |
+| Elijah Taylor     | NULL          |                89 |
+| Gil Pond          | Otawa         |                45 |
+| Gil Pond          | NULL          |                45 |
+| Hayden Talbot     | Springfield   |                50 |
+| Hayden Talbot     | NULL          |                50 |
+| John Khan         | Glendale      |                55 |
+| John Khan         | NULL          |                55 |
+| Josh Reese        | Oklahoma City |                70 |
+| Josh Reese        | NULL          |                70 |
+| Josh Reyes        | Fayetteville  |                67 |
+| Josh Reyes        | NULL          |                67 |
+| Martin Cartwright | New Orleans   |                10 |
+| Martin Cartwright | NULL          |                10 |
+| Matt Brown        | Berna         |                43 |
+| Matt Brown        | NULL          |                43 |
+| Matt Mcguire      | El Paso       |                20 |
+| Matt Mcguire      | NULL          |                20 |
+| Matt Murphy       | Lincoln       |                81 |
+| Matt Murphy       | NULL          |                81 |
+| Mike Russell      | Portland      |                63 |
+| Mike Russell      | NULL          |                63 |
+| Nicholas Hooper   | Hollywood     |                69 |
+| Nicholas Hooper   | NULL          |                69 |
+| Owen Greenwood    | Berlin        |                83 |
+| Owen Greenwood    | NULL          |                83 |
+| Richard Voghs     | Berlin        |                78 |
+| Richard Voghs     | NULL          |                78 |
+| Rocco Booth       | Anaheim       |                30 |
+| Rocco Booth       | NULL          |                30 |
+| Rocco Harrison    | Dallas        |                90 |
+| Rocco Harrison    | NULL          |                90 |
+| Ron Cartwright    | Minneapolis   |                35 |
+| Ron Cartwright    | NULL          |                35 |
+| Ronald Aldridge   | Denver        |                48 |
+| Ronald Aldridge   | NULL          |                48 |
+| Ryan Whinter      | Berna         |                32 |
+| Ryan Whinter      | NULL          |                32 |
+| Samuel Manchester | Denver        |                20 |
+| Samuel Manchester | NULL          |                20 |
+| Tyson Kaur        | Murfreesboro  |                49 |
+| Tyson Kaur        | NULL          |                49 |
+| NULL              | NULL          |              1682 |
++-------------------+---------------+-------------------+
+
+3.
+select med_name, count(company) from medicine where med_name in ("Arcoxia", "Aspirin", "Metformin") group by med_name;
++-----------+----------------+
+| med_name  | count(company) |
++-----------+----------------+
+| Arcoxia   |              3 |
+| Aspirin   |              2 |
+| Metformin |              1 |
++-----------+----------------+
+
+4. 
+select transaction.cust_name, sum(total_amount) from transaction join customer on transaction.cust_name=customer.cust_name group by transaction.cust_name;
++--------------------+-------------------+
+| cust_name          | sum(total_amount) |
++--------------------+-------------------+
+| Raman Singh        |               530 |
+| Abhinav Gupta      |              1050 |
+| Zoya Singhania     |              7000 |
+| Daron Jenkins      |               673 |
+| Naina Verma        |              8250 |
+| Shivangi Mukherjee |              3681 |
+| Shriya Agarwal     |              1423 |
+| Jolene Stevens     |              1405 |
++--------------------+-------------------+
+
